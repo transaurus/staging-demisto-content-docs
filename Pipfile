@@ -1,0 +1,31 @@
+[dev-packages]
+flake8 = "*"
+pytest = "*"
+autopep8 = "*"
+mypy = "*"
+pytest-mock = "*"
+requests-mock = "*"
+
+[packages]
+pyyaml = "*"
+types-PyYAML = "*"
+inflection = "*"
+beautifulsoup4 = "*"
+circleci = "==1.2.2"
+requests = "*"
+types-requests = "*"
+pydoc-markdown = ">=4.8.2,<5.0.0"
+python-dateutil = "*"
+types-python-dateutil = "*"
+slack_sdk = "*"
+packaging = "*"
+google-api-python-client = "*"
+google-cloud-storage = "*"
+
+[requires]
+python_version = "3.10"
+
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true

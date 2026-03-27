@@ -1,0 +1,447 @@
+---
+id: tut-setup-dev
+title: Set Up Your Dev Environment
+---
+
+This tutorial will guide you on how to set up your dev environment to quickly start developing on Cortex XSOAR. While in Cortex XSOAR you can write code directly in the UI, which is awesome, you'll need a proper development environment external to Cortex XSOAR to contribute a full integration. This is because, in order to build a full fledged integration, you'll need to *lint* your code, run unit tests with *pytest*, create some documentation, submit your changes via *git* and more.
+
+If you've been through this process already and just want a quick reference, you can jump to the [Development Setup](../concepts/dev-setup) page, otherwise keep reading for more details.
+
+This tutorial will guide you through the following steps:
+
+1. Verify the requirements
+2. Fork the GitHub repo
+3. Clone the GitHub fork locally
+4. Set up the environment
+5. Run the linter and unit tests
+6. Create a branch and integration directory
+7. Commit and push
+
+### Step 1: Verify the requirements
+
+Let's go make sure that all the requirements are satisfied, one by one.
+
+#### Cortex XSOAR
+
+We are assuming that Cortex XSOAR is already installed. For more information about installing Cortex XSOAR please refer to [this article](https://docs.paloaltonetworks.com/cortex/cortex-xsoar/6-0/cortex-xsoar-admin/installation.html) (Support Center credentials are required)
+
+Check if your Cortex XSOAR License is correctly installed by navigating to *Settings* -> *ABOUT* -> *License* and make sure that everything is green:
+
+![Check Cortex XSOAR License](/doc_imgs/tutorials/tut-setup-dev/01-checkdemistolicense.gif)
+
+**PRO tip**: you can quickly navigate to different pages within Cortex XSOAR by hitting *Ctrl-K* and then typing what you want. For the license page, for example, type */settings/license* or just *lic* and select the autocompleted option:
+
+![Jump to Page](/doc_imgs/tutorials/tut-setup-dev/02-jumptopage.png)
+
+
+#### GitHub
+
+Not much to check here, just go to [GitHub](https://github.com) and make sure that you have an account or Sign Up for one:
+
+![GitHub](/doc_imgs/tutorials/tut-setup-dev/03-github.png)
+
+
+#### Docker
+
+Make sure that `docker` is installed on your system and is working correctly by running the `hello-world` container:
+
+```bash
+sb@dddd:~/demisto$ docker run --rm hello-world
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+[... output omitted for brevity ...]
+
+For more examples and ideas, visit:
+ https://docs.docker.com/get-started/
+
+sb@dddd:~/demisto$
+```
+
+:::info
+Make sure that `Allow the default Docker socket to be used (requires password)` is enabled in **Docker** advanced settings.
+:::
+
+:::tip
+If you are using WSL2 on Windows, you can still use Docker Desktop from WSL.
+See [the following tutorial](https://docs.docker.com/desktop/windows/wsl/#enabling-docker-support-in-wsl-2-distros) for more details.
+:::
+
+Great, all the prerequisites are set! We can get started.
+
+### Step 2: Fork the GitHub repo
+
+Make sure you're logged on GitHub and navigate to the [Cortex XSOAR Content Repo](https://github.com/demisto/content) and click on **Fork**:
+
+![Fork Repository](/doc_imgs/tutorials/tut-setup-dev/04-fork.png)
+
+Once the fork is complete, copy the URL:
+
+![Copy GitHub URL](/doc_imgs/tutorials/tut-setup-dev/05-copygithuburl.png)
+
+This is the fork where you will commit your code and, once ready, create the Pull Request to submit your contribution back to the Cortex XSOAR Content repository.
+
+### Step 3: Clone the GitHub fork locally
+
+Back to the shell, create a folder (in the tutorial we'll use `~/demisto`) and clone your fork of the content repository using `git clone [your_fork_url]`, where `[your_fork_url]` is the URL you copied from GitHub in the previous step:
+
+```bash
+sb@dddd:~$ mkdir demisto
+sb@dddd:~$ cd demisto
+sb@dddd:~/demisto$ git clone https://github.com/[omitted]/content.git
+Cloning into 'content'...
+remote: Enumerating objects: 108, done.
+remote: Counting objects: 100% (108/108), done.
+remote: Compressing objects: 100% (90/90), done.
+remote: Total 101143 (delta 50), reused 53 (delta 18), pack-reused 101035
+Receiving objects: 100% (101143/101143), 110.65 MiB | 11.04 MiB/s, done.
+Resolving deltas: 100% (73634/73634), done.
+Checking out files: 100% (4522/4522), done.
+sb@dddd:~/demisto$
+```
+
+*Note:* You must clone **your fork** of the repository, as you will need to be able to write into it. Do **not** clone `demisto/content`, as you won't be able to push commits.
+
+### Step 4: Setup environment
+
+#### Option 1: Setup a remote environment
+
+Follow the instructions in this [guide](tut-setup-dev-remote.md).
+
+#### Option 2: Setup a local environment
+
+#### Let VSCode extension set up a local environment (Linux, MacOS, WSL2)
+
+Follow this [guide](https://xsoar.pan.dev/docs/concepts/vscode-extension#local-development-linux-macos-wsl2) to set up a fully configured local environment.
+
+#### Manually set up a local environment (Linux, MacOS, WSL2)
+
+##### Operating System
+
+We assume you have an operating system and that it is working. :)
+
+*Note:* If you are using **Windows with WSL**, and your code resides in a shared folder on the Windows tree (i.e., `/mnt/c/code/demisto`), make sure that the folder is set to be [case sensitive](https://devblogs.microsoft.com/commandline/improved-per-directory-case-sensitivity-support-in-wsl/).
+
+##### Python and pyenv
+
+You will need `python3` installed on your system. We recommend using `pyenv`. At the time of this writing, the latest version of Python 3.10 is *3.10.5*.
+
+Make sure `pyenv` in installed and that the `eval "$(pyenv init -)"` expression is placed in your shell configuration (`~/.bashrc` or `~/.zshrc`) - [more information about this](https://github.com/pyenv/pyenv#installation).
+
+```bash
+sb@dddd:~/demisto$ eval "$(pyenv init -)"
+sb@dddd:~/demisto$ pyenv -v
+pyenv 1.2.15
+sb@dddd:~/demisto$~/demisto$
+```
+If this doesn't work, follow the instructions [here](https://github.com/pyenv/pyenv#installation). Either Homebrew for MacOS or the automatic installer on Linux/WSL works fine.
+
+Make sure that the required version of Python is available:
+
+```bash
+sb@dddd:~/demisto$ pyenv versions
+  3.10.5
+sb@dddd:~/demisto$
+```
+If this doesn't work, follow the instructions [here](https://github.com/pyenv/pyenv#installation). Either Homebrew for MacOS or the automatic installer on Linux/WSL work fine.
+
+If the required version of Python is missing, you will need to install it. As `pyenv` compiles CPython, you might need some libraries. Depending on your operating system, this [article](https://github.com/pyenv/pyenv/wiki/Common-build-problems)  explains how to install the required dependencies and provides useful troubleshooting info.
+
+Now is a good time to take a break since installing might take a while.
+
+Install Python 3.10.5:
+
+```bash
+sb@dddd:~/demisto$ pyenv install 3.10.5
+Downloading Python-3.10.5.tar.xz...
+-> https://www.python.org/ftp/python/3.10.5/Python-3.10.5.tar.xz
+Installing Python-3.10.5...
+Installed Python-3.10.5 to /home/sb/.pyenv/versions/3.10.5
+
+sb@dddd:~/demisto$ pyenv versions
+  3.10.5
+sb@dddd:~/demisto$
+```
+And that's it! Again, if the installation fails, check out [this](https://github.com/pyenv/pyenv/wiki/Common-build-problems) page.
+
+##### Poetry
+
+Follow these instructions to install [poetry](https://python-poetry.org/docs/#installing-with-the-official-installer)
+
+##### Node
+
+Follow these [instructions](https://github.com/nvm-sh/nvm#install--update-script) to install the `nvm` package manager.
+
+After installing, run:
+```bash
+nvm install node
+```
+
+##### Bootstrap
+
+Before running the `bootstrap` script that creates the virtual environment, let's set up `pyenv` to work correctly in the `content` folder you just cloned.
+
+At the beginning, no local python interpreter has been set via `pyenv`:
+```bash
+sb@dddd:~/demisto$ cd content
+sb@dddd:~/demisto/content$ pyenv local
+pyenv: no local version configured for this directory
+```
+
+You can tell `pyenv` to use the latest version Python 3 you previously installed and verify that everything is set correctly:
+```
+sb@dddd:~/demisto/content$ pyenv local 3.10.5
+
+sb@dddd:~/demisto/content$ pyenv local
+3.10.5
+
+sb@dddd:~/demisto/content$ which python3
+/home/sb/.pyenv/shims/python3
+
+sb@dddd:~/demisto/content$ python3 -V
+Ptyhon 3.10.5
+```
+
+Now you can run the `.hooks/bootstrap` script that will install the dependencies and create the `poetry` environment:
+```bash
+sb@dddd:~/demisto/content$ .hooks/bootstrap
+Installing 'pre-commit' hooks
+=======================
+Configure poetry to install virtual environment in the project repo (will be available in (.venv)
+Check if poetry files are valid
+All set!
+Installing dependencies...
+Detected local env.
+Installing dependencies from lock file
+
+No dependencies to install or update
+==========================
+Done setting up virtualenv with poetry
+Activate the venv by running: poetry shell
+Deactivate by running: deactivate
+=======================
+Running: npm install ...
+
+up to date, audited 230 packages in 1s
+```
+
+*Note*: if you are using WSL and you see some errors about "python.exe" getting called, disable it in App Execution Alias ([details](https://superuser.com/questions/1437590/typing-python-on-windows-10-version-1903-command-prompt-opens-microsoft-stor)).
+
+Everything is configured, and you can start developing. When you work on your integration, you can activate `poetry` with the `poetry shell` command (Note: The shell command was moved to a plugin: [poetry-plugin-shell](https://github.com/python-poetry/poetry-plugin-shell)):
+```bash
+sb@dddd:~/demisto/content$ poetry shell
+(.venv) sb@dddd:~/demisto/content$
+```
+
+Note the `(.venv)` in front of the prompt. You can always leave the `poetry` virtual environment using the `deactivate` command:
+
+```bash
+(.venv) sb@dddd:~/demisto/content$ deactivate
+sb@dddd:~/demisto/content$
+```
+
+### Step 5: Run the linter and unit tests
+
+Our content ships with an `HelloWorld` integration that provides basic functionality and is useful to understand how to create integrations.
+
+It's located in the `Packs/HelloWorld/Integrations/HelloWorld` folder. We will use `demisto-sdk` to run the *linting* and *unit testing* in order to make sure that everything is fine with the dev environment (python, docker, etc.).
+
+First, make sure you are running inside the `poetry` virtual environment:
+```bash
+sb@dddd:~/demisto/content$ poetry shell
+(.venv) sb@dddd:~/demisto/content$
+```
+
+Then, make sure that `demisto-sdk` has been installed automatically by the bootstrap script as part of the preqreuisites:
+```bash
+(venv) sb@dddd:~/demisto/content$ demisto-sdk --version
+demisto-sdk version: 1.33.0
+```
+
+Now, run the `demisto-sdk pre-commit` command ([pre-commit documentation](https://docs-cortex.paloaltonetworks.com/r/1/Demisto-SDK-Guide/pre-commit)) on the folder `Packs/HelloWorld/Integrations/HelloWorld` using the `-i` option,
+ or if you want to run  against all the committed files in your branch you can use `demisto-sdk pre-commit -g`.
+It will run both the [linters](../integrations/linting) and [pytest](../integrations/unit-testing):
+```bash
+(venv) sb@dddd:~/demisto/content$ demisto-sdk pre-commit -i Packs/HelloWorld/Integrations/HelloWorld
+Running pre-commit using template /Users/sfainberg/dev/demisto/content/.pre-commit-config_template.yaml
+Running pre-commit with Python 3.11 on:
+Packs/HelloWorld/Integrations/HelloWorld/HelloWorld.py
+Packs/HelloWorld/Integrations/HelloWorld/HelloWorld.yml
+Packs/HelloWorld/Integrations/HelloWorld/HelloWorld_description.md
+Packs/HelloWorld/Integrations/HelloWorld/HelloWorld_image.png
+Packs/HelloWorld/Integrations/HelloWorld/HelloWorld_test.py
+Packs/HelloWorld/Integrations/HelloWorld/README.md
+Packs/HelloWorld/Integrations/HelloWorld/command_examples
+Packs/HelloWorld/Integrations/HelloWorld/test_data/get_alert.json
+Packs/HelloWorld/Integrations/HelloWorld/test_data/incident_note_list_command.json
+Packs/HelloWorld/Integrations/HelloWorld/test_data/ip_reputation.json
+DockerHook - Unable to find image docker.io/devtestdemisto/python3:3.11.10.115186-12dd7198e064c21c217cc72c87ddadd5. Creating image based on docker.io/demisto/python3:3.11.10.115186 - Could take 2-3 minutes at first
+check json...............................................................Passed
+check yaml...............................................................Passed
+check python ast.........................................................Passed
+check for merge conflicts................................................Passed
+debug statements (python)................................................Passed
+python tests naming......................................................Passed
+check for added large files..............................................Passed
+check for case conflicts.................................................Passed
+poetry-check.........................................(no files to check)Skipped
+pycln....................................................................Passed
+ruff-py3.11..............................................................Passed
+autopep8.................................................................Passed
+mypy-py3.11..............................................................Passed
+xsoar-lint...............................................................Passed
+pylint-in-docker-demisto/python3:3.11.10.115186..........................Passed
+pytest-in-docker-demisto/python3:3.11.10.115186..........................Passed
+validate-deleted-files...................................................Passed
+validate-content-paths...................................................Passed
+validate-conf-json...................................(no files to check)Skipped
+validate.................................................................Passed
+secrets..................................................................Passed
+merge-pytest-reports.....................................................Passed
+coverage-pytest-analyze..................................................Passed
+```
+
+Note that the tests run within a Docker container so, if everything worked well, it means that your development environment is up and running correctly!
+
+### Step 6: Create a branch
+
+The [Git Flow](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests) requires to create a *branch* with your new code, that you will later use to submit a *Pull Request*. This tutorial doesn't mean to be an exhaustive guide on how to use `git`: its purpose is just to make sure that you have all the requirements and tools in place to successfully develop a Cortex XSOAR Integration.
+
+In order to create a branch, use the  `git checkout -b [branch_name]` command, where the name of the branch corresponds to your integration:
+
+```bash
+(venv) sb@dddd:~/demisto/content$ git checkout -b my_integration_name
+Switched to a new branch 'my_integration_name'
+```
+### Step 7: Create your integration directory
+Create a directory under `Packs/<Your pack name>` named after your product where you will put all your content files later, and add it to the staged changes in `git`. Make sure you use **PascalCase** in the directory name (i.e. `MyIntegration`).
+For a detailed description regarding what exactly a pack is please click [here](../packs/packs-format).
+
+You can create a Pack and an Integration directory using the [`demisto-sdk init` command](https://docs-cortex.paloaltonetworks.com/r/1/Demisto-SDK-Guide/init).
+An example of creating a pack called `MyNewPack`, with an integration called `MyIntegration`, and with the metadata file created automatically:
+```bash
+➜  content-docs2 git:(add-pack-and-sdk-docs) ✗ demisto-sdk init --pack
+Please input the name of the initialized pack: MyNewPack
+Successfully created the pack test in: MyIntegration
+
+Do you want to fill pack's metadata file? Y/N y
+
+Display name of the pack: MyNewPack
+
+Description of the pack: A description for my newly created pack.
+
+Support type of the pack:
+[1] demisto
+[2] partner
+[3] developer
+[4] community
+
+Enter option: 2
+
+Server min version: 5.0.0
+
+Author of the pack: Partner name
+
+The url of support, should represent your GitHub account (optional): https://github.com/<PartnerGitAccount>
+
+The email in which you can be contacted in: partner@partner.com
+
+Pack category options:
+[1] Analytics & SIEM
+[2] Utilities
+[3] Messaging
+[4] Endpoint
+[5] Network Security
+[6] Vulnerability Management
+[7] Case Management
+[8] Forensics & Malware Analysis
+[9] IT Services
+[10] Data Enrichment & Threat Intelligence
+[11] Authentication
+[12] Database
+[13] Deception
+[14] Email Gateway
+
+Enter option: 1
+
+Tags of the pack, comma separated values:
+Created pack metadata at path : MyNewPack/metadata.json
+
+Do you want to create an integration in the pack? Y/N y
+Please input the name of the initialized integration: test
+Do you want to use the directory name as an ID for the integration? Y/N y
+Finished creating integration: MyNewPack/Integrations/test.
+
+```
+
+### Step 8: Commit and push
+
+The last step is to `commit` your changes and `push` them to the *origin* in order to make sure that the pre-commit checks work fine.
+
+But you can also run the hooks locally using the demisto-sdk, in order to do that you can run the commands:
+1. `demisto-sdk format` - this will auto correct couple of things in order for our validation to pass.
+You can see the [docs](https://docs-cortex.paloaltonetworks.com/r/1/Demisto-SDK-Guide/format)
+2. `demisto-sdk validate -g` - this will validate the integrity of the yml files, and will make sure they follow
+our pre-set of roles. You can see the [docs](https://docs-cortex.paloaltonetworks.com/r/1/Demisto-SDK-Guide/validate)
+3. `demisto-sdk pre-commit -i <The path to your changed/newly added content entity>` - this will run variety of checks and linters on your
+changed python files. You can see the [docs](https://docs-cortex.paloaltonetworks.com/r/1/Demisto-SDK-Guide/pre-commit)
+
+
+
+First, run a `git commit -m '[some commit message]'`, which will automatically run the pre validation checks:
+
+
+```bash
+(venv) sb@dddd:~/demisto/content$ git commit -m 'Initial commit of MyIntegration'
+Validating files...
+Starting validating files structure
+Using git
+Running validation on branch my_integration_name
+Validates only committed files
+Starting validation against origin/master
+The files are valid
+Starting secrets detection
+Finished validating secrets, no secrets were found.
+
+Skipping running dev tasks (flake8, mypy, pylint, pytest). If you want to run this as part of the precommit hook
+set CONTENT_PRECOMMIT_RUN_DEV_TASKS=1. You can add the following line to ~/.zshrc:
+echo "export CONTENT_PRECOMMIT_RUN_DEV_TASKS=1" >> ~/.zshrc
+
+Or if you want to manually run dev tasks: ./Tests/scripts/pkg_dev_test_tasks.py -d <integration/script dir>
+Example: ./Tests/scripts/pkg_dev_test_tasks.py -d Scripts/ParseEmailFiles
+
+On branch my_integration_name
+Untracked files:
+        .python-version
+
+nothing added to commit but untracked files present
+```
+
+Don't worry about the `.python-version` file warning, that is generated by  `pyenv` and shouldn't be added to the repository.
+
+*Note*: since there are no files yet in the directory you have created (`Integrations/MyIntegration` in the example), it will not show up in your branch after the commit. Again, the purpose of this tutorial is just to make sure that all the components are in place.
+
+If everything worked fine so far, now you can *push* to your branch with the command `git push origin [branch_name]`. You will be prompted for your GitHub credentials:
+
+```bash
+(venv) sb@dddd:~/demisto/content$ git push origin my_integration_name
+Username for 'https://github.com': [omitted]
+Password for 'https://[omitted]@github.com':
+Total 0 (delta 0), reused 0 (delta 0)
+remote:
+remote: Create a pull request for 'my_integration_name' on GitHub by visiting:
+remote:      https://github.com/[omitted]/content/pull/new/my_integration_name
+remote:
+To https://github.com/[omitted]/content
+ * [new branch]          my_integration_name -> my_integration_name
+(venv) sb@dddd:~/demisto/content$
+```
+
+You can go back to GitHub and, under **your** fork, you should be able to see that there is a new branch with the name you provided (`my_integration_name` in this example):
+
+![GitHub Branch](/doc_imgs/tutorials/tut-setup-dev/06-githubbranch.png)
+
+Congratulations! You completed the set up of the Development Environment for Cortex XSOAR! Now you can start writing your code. Please have a look at the [Code Conventions](../integrations/code-conventions).
+
+Thank for your time, we hope you enjoyed this tutorial. Please report issues and suggestions using the link below!
