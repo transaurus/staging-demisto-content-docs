@@ -57,12 +57,15 @@ jobs:
 
       - name: 'Run write-translations'
         run: |
+          # Source env vars from prepare.sh if it wrote a .build-env file
+          [ -f "source-repo/.build-env" ] && source source-repo/.build-env
           cd "source-repo/${{ steps.meta.outputs.docusaurusRoot }}"
           echo "Running: ${{ steps.meta.outputs.translateCommand }}"
           ${{ steps.meta.outputs.translateCommand }}
 
       - name: 'Run build'
         run: |
+          [ -f "source-repo/.build-env" ] && source source-repo/.build-env
           cd "source-repo/${{ steps.meta.outputs.docusaurusRoot }}"
           echo "Running: ${{ steps.meta.outputs.buildCommand }}"
           ${{ steps.meta.outputs.buildCommand }}
