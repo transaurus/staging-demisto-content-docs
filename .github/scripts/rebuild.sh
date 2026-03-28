@@ -26,6 +26,10 @@ if grep -q 'node-options=--max-old-space-size=46080' .npmrc 2>/dev/null; then
     echo "[INFO] Patched .npmrc: added --openssl-legacy-provider, reduced max-old-space-size to 4096"
 fi
 
+# --- Pre-build: ensure directories exist ---
+# build-docusaurus script starts with: cp docs/doc_imgs/* static/doc_imgs/
+mkdir -p static/doc_imgs docs/doc_imgs
+
 # --- Build ---
 npm run build-docusaurus
 
