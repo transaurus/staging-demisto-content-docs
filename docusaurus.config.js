@@ -28,6 +28,10 @@ const remarkPlugin = () => {
 };
 
 module.exports = {
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en", "zh-Hans"],
+  },
   title: "Cortex XSOAR",
   tagline: "Developers - Palo Alto Networks",
   url: "https://xsoar.pan.dev",

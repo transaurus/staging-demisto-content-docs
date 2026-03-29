@@ -1,0 +1,26 @@
+{
+  "link.title.Docs": {
+    "message": "Docs",
+    "description": "The title of the footer links column with title=Docs in the footer"
+  },
+  "link.title.Social": {
+    "message": "Social",
+    "description": "The title of the footer links column with title=Social in the footer"
+  },
+  "link.item.label.Developer Docs": {
+    "message": "Developer Docs",
+    "description": "The label of footer link with label=Developer Docs linking to /docs/welcome"
+  },
+  "link.item.label.Become a Technology Partner": {
+    "message": "Become a Technology Partner",
+    "description": "The label of footer link with label=Become a Technology Partner linking to /docs/partners/become-a-tech-partner"
+  },
+  "link.item.label.Blog": {
+    "message": "Blog",
+    "description": "The label of footer link with label=Blog linking to https://blog.demisto.com/"
+  },
+  "copyright": {
+    "message": "Copyright © 2026 Palo Alto Networks, Inc.",
+    "description": "The footer copyright"
+  }
+}
